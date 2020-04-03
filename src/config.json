@@ -9,48 +9,121 @@
   "instances": [
     {
       "tag": "test001",
-      "cacheFrequency": 30,
-      "syncFrequency": 0,
-      "httpConfig": {
-        "hostUrl": "http://localhost:8082",
-        "header": {
-          "header1": "test1",
-          "header2": "test2"
-        },
-        "username": null,
-        "password": null
-      },
-      "database": {
-        "type": "postgres",
-        "hostOrPath": "127.0.0.1",
-        "port": 5432,
-        "charset": "utf8",
-        "dbname": "testDatabase",
-        "username": "root",
-        "password": "",
-      },
-      "syncs": [
-        {
-          "endpoint": {
-            "path": "/receive?id={{id}}&name={{name}}",
-            "type": "POST",
-            "ValidStatusCode": 200,
-            "ValidStringRegex": "Ok",
-            "extraHeader": {
+      "source": {
+        "mode": "http/database",
+        "frequency": 0,
+        "-http": {
+          "config": {
+            "url": "http://localhost:3000",
+            "header": {
               "header1": "test1",
               "header2": "test2"
             },
-            "body": {
-              "var1": "test1",
-              "var2": "test1",
-              "test_id": "{{id}}",
-              "test_name": "{{name}}"
+            "ContentType": "json/xml",
+            "username": null,
+            "password": null
+          }
+        },
+        "-database": {
+          "config": {
+            "type": "postgres",
+            "hostOrPath": "127.0.0.1",
+            "port": 5432,
+            "charset": "utf8",
+            "dbname": "testDatabase",
+            "username": "root",
+            "password": ""
+          }
+        }
+      },
+      "destination": {
+        "mode": "http|database|both",
+        "frequency": 30,
+        "*http": {
+          "config": {
+            "url": "http://localhost:3000",
+            "header": {
+              "header1": "test1",
+              "header2": "test2"
+            },
+            "ContentType": "json/xml",
+            "username": null,
+            "password": null
+          }
+        },
+        "*database": {
+          "config": {
+            "type": "postgres",
+            "hostOrPath": "127.0.0.1",
+            "port": 5432,
+            "charset": "utf8",
+            "dbname": "testDatabase",
+            "username": "root",
+            "password": ""
+          }
+        }
+      },
+      "syncs": [
+        {
+          "destination": {
+            "*http": {
+              "path": "/receive?id={{id}}&name={{name}}",
+              "type": "POST",
+              "ValidStatusCode": 200,
+              "ValidStringRegex": "Ok",
+              "extraHeader": {
+                "header1": "test1",
+                "header2": "test2"
+              },
+              "params": {
+                "id": "{{id}}",
+                "name": "{{name}}"
+              },
+              "body": {
+                "content": {
+                  "-xml": "<if />",
+                  "var1": "test1",
+                  "var2": "test1",
+                  "test_id": "{{id}}",
+                  "test_name": "{{name}}"
+                }
+              }
+            },
+            "*database": {
+              "check": "select count(1) from tests where id = {{id}}; /* checks if data exist on a table */",
+              "save": "insert into tests (id, name) values ({{id}}, {{name}}); /* save queued row */",
+              "confirm": "select count(1) nums from (select count(1) nums from tests where id = {{id}}) based where based.nums = 1; /* confirm if the row exist by the id */"
             }
           },
-          "query": {
-            "check": "select count(1) from tests where sync = 0; /* checks counts of pending sync */",
-            "pick": "select id, name from tests where sync = 0; /* selects list of pending sync */",
-            "confirm": "update tests set sync = 1 where id in {{id}}; /* Set a particular field to confirm syncs, with list of field picked from result */"
+          "source": {
+            "*http": {
+              "path": "/receive?id={{id}}&name={{name}}",
+              "type": "GET",
+              "ValidStatusCode": 200,
+              "ValidStringRegex": "status: 1",
+              "extraHeader": {
+                "header1": "test1",
+                "header2": "test2"
+              },
+              "params": {
+                "id": "{{id}}",
+                "name": "{{name}}"
+              },
+              "body": {
+                "content": {
+                  "-xml": "<if />",
+                  "var1": "test1",
+                  "var2": "test1",
+                  "test_id": "{{id}}",
+                  "test_name": "{{name}}"
+                }
+              }
+            },
+            "*database": {
+              "check": "select count(1) from tests where sync = 0; /* checks counts of pending sync */",
+              "pick": "select id, name from tests where sync = 0; /* selects list of pending sync */",
+              "confirm": "update tests set sync = 1 where id in {{id}}; /* Set a particular field to confirm syncs, with list of field picked from result */"
+            }
           }
         }
       ]
