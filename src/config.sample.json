@@ -85,7 +85,8 @@
                   "var1": "test1",
                   "var2": "test1",
                   "test_id": "{{id}}",
-                  "test_name": "{{name}}"
+                  "test_name": "{{name}}",
+                  "test_item_field": "{{items.info_sample}}"
                 }
               }
             },
@@ -117,7 +118,12 @@
                   "test_id": "{{id}}",
                   "test_name": "{{name}}"
                 }
-              }
+              },
+              "items": [
+                {
+                  "***info": "Same a parent object (for call-back) #for http only now."
+                }
+              ]
             },
             "*database": {
               "check": "select count(1) from tests where sync = 0; /* checks counts of pending sync */",
