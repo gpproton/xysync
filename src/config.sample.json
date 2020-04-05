@@ -12,55 +12,47 @@
       "source": {
         "mode": "http/database",
         "frequency": "* * * * * *",
-        "http": {
-          "config": {
-            "url": "http://localhost:3000",
-            "header": {
-              "header1": "test1",
-              "header2": "test2"
-            },
-            "ContentType": "json/xml",
-            "username": null,
-            "password": null
-          }
+        "httpConfig": {
+          "url": "http://localhost:3000",
+          "header": {
+            "header1": "test1",
+            "header2": "test2"
+          },
+          "ContentType": "json/xml",
+          "username": null,
+          "password": null
         },
-        "database": {
-          "config": {
-            "type": "postgres",
-            "hostOrPath": "127.0.0.1",
-            "port": 5432,
-            "charset": "utf8",
-            "dbname": "testDatabase",
-            "username": "root",
-            "password": ""
-          }
+        "databaseConfig": {
+          "type": "postgres",
+          "hostOrPath": "127.0.0.1",
+          "port": 5432,
+          "charset": "utf8",
+          "dbname": "testDatabase",
+          "username": "root",
+          "password": ""
         }
       },
       "destination": {
         "mode": "http|database|both",
         "frequency": "*/3 * * * * *",
-        "*http": {
-          "config": {
-            "url": "http://localhost:3000",
-            "header": {
-              "header1": "test1",
-              "header2": "test2"
-            },
-            "ContentType": "json/xml",
-            "username": null,
-            "password": null
-          }
+        "httpConfig": {
+          "url": "http://localhost:3000",
+          "header": {
+            "header1": "test1",
+            "header2": "test2"
+          },
+          "ContentType": "json/xml",
+          "username": null,
+          "password": null
         },
-        "database": {
-          "config": {
-            "type": "postgres",
-            "hostOrPath": "127.0.0.1",
-            "port": 5432,
-            "charset": "utf8",
-            "dbname": "testDatabase",
-            "username": "root",
-            "password": ""
-          }
+        "databaseConfig": {
+          "type": "postgres",
+          "hostOrPath": "127.0.0.1",
+          "port": 5432,
+          "charset": "utf8",
+          "dbname": "testDatabase",
+          "username": "root",
+          "password": ""
         }
       },
       "syncs": [
@@ -88,20 +80,48 @@
                   "test_id": "{{id}}",
                   "test_name": "{{name}}"
                 }
-              }
+              },
+              "items": [
+                {
+                  "item1": {
+                    "path": "/receive?id={{id}}&name={{name}}",
+                    "type": "GET",
+                    "ValidStatusCode": 200,
+                    "ValidStringRegex": "status: 1",
+                    "header": {
+                      "header1": "test1",
+                      "header2": "test2"
+                    },
+                    "params": {
+                      "id": "{{id}}",
+                      "name": "{{name}}"
+                    },
+                    "body": {
+                      "type": "text|json|xml",
+                      "raw": "",
+                      "encoded": false,
+                      "form": {
+                        "var1": "test",
+                        "test_id": "{{id}}",
+                        "test_name": "{{name}}"
+                      }
+                    }
+                  }
+                }
+              ]
             },
             "database": {
               "query": {
                 "check": "select count(1) from tests where id = {{id}}; /* checks if data exist on a table */",
-                "save": "insert into tests (id, name) values ({{id}}, {{name}}); /* save queued row */",
+                "perform": "insert into tests (id, name) values ({{id}}, {{name}}); /* save queued row */",
                 "confirm": "select count(1) nums from (select count(1) nums from tests where id = {{id}}) based where based.nums = 1; /* confirm if the row exist by the id */"
               },
-              "subCommits": [
+              "subQuery": [
                 {
                   "name": "sub1",
                   "query": {
                     "check": "",
-                    "save": "",
+                    "perform": "",
                     "confirm": ""
                   }
                 }
@@ -134,14 +154,37 @@
               },
               "items": [
                 {
-                  "***info": "Same a parent object."
+                  "item1": {
+                    "path": "/receive?id={{id}}&name={{name}}",
+                    "type": "GET",
+                    "ValidStatusCode": 200,
+                    "ValidStringRegex": "status: 1",
+                    "header": {
+                      "header1": "test1",
+                      "header2": "test2"
+                    },
+                    "params": {
+                      "id": "{{id}}",
+                      "name": "{{name}}"
+                    },
+                    "body": {
+                      "type": "text|json|xml",
+                      "raw": "",
+                      "encoded": false,
+                      "form": {
+                        "var1": "test",
+                        "test_id": "{{id}}",
+                        "test_name": "{{name}}"
+                      }
+                    }
+                  }
                 }
               ]
             },
             "database": {
               "query": {
                 "check": "select count(1) from tests where sync = 0; /* checks counts of pending sync */",
-                "pick": "select id, name from tests where sync = 0; /* selects list of pending sync */",
+                "perform": "select id, name from tests where sync = 0; /* selects list of pending sync */",
                 "confirm": "update tests set sync = 1 where id in {{id}}; /* Set a particular field to confirm syncs, with list of field picked from result */"
               },
               "subQuery": [
@@ -149,7 +192,7 @@
                   "name": "sub1",
                   "query": {
                     "check": "",
-                    "pick": "",
+                    "perform": "",
                     "confirm": ""
                   }
                 }
