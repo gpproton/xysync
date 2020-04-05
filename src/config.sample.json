@@ -4,15 +4,15 @@
     "type": "redis",
     "host": "127.0.0.1",
     "port": 6378,
-    "defaultTimeout": 300
+    "defaultTimeout": "* * * * * *"
   },
   "instances": [
     {
       "tag": "test001",
       "source": {
         "mode": "http/database",
-        "frequency": 0,
-        "-http": {
+        "frequency": "* * * * * *",
+        "http": {
           "config": {
             "url": "http://localhost:3000",
             "header": {
@@ -24,7 +24,7 @@
             "password": null
           }
         },
-        "-database": {
+        "database": {
           "config": {
             "type": "postgres",
             "hostOrPath": "127.0.0.1",
@@ -38,7 +38,7 @@
       },
       "destination": {
         "mode": "http|database|both",
-        "frequency": 30,
+        "frequency": "*/3 * * * * *",
         "*http": {
           "config": {
             "url": "http://localhost:3000",
@@ -51,7 +51,7 @@
             "password": null
           }
         },
-        "*database": {
+        "database": {
           "config": {
             "type": "postgres",
             "hostOrPath": "127.0.0.1",
@@ -66,7 +66,7 @@
       "syncs": [
         {
           "destination": {
-            "*http": {
+            "http": {
               "path": "/receive?id={{id}}&name={{name}}",
               "type": "POST",
               "ValidStatusCode": 200,
@@ -90,7 +90,7 @@
                 }
               }
             },
-            "*database": {
+            "database": {
               "query": {
                 "check": "select count(1) from tests where id = {{id}}; /* checks if data exist on a table */",
                 "save": "insert into tests (id, name) values ({{id}}, {{name}}); /* save queued row */",
@@ -109,7 +109,7 @@
             }
           },
           "source": {
-            "*http": {
+            "http": {
               "path": "/receive?id={{id}}&name={{name}}",
               "type": "GET",
               "ValidStatusCode": 200,
@@ -138,7 +138,7 @@
                 }
               ]
             },
-            "*database": {
+            "database": {
               "query": {
                 "check": "select count(1) from tests where sync = 0; /* checks counts of pending sync */",
                 "pick": "select id, name from tests where sync = 0; /* selects list of pending sync */",
@@ -159,8 +159,6 @@
         }
       ]
     },
-    {
-      "info": "Second row.."
-    }
+    { }
   ]
 }
