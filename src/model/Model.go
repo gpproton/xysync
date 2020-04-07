@@ -1,5 +1,11 @@
 package model
 
+type Config struct {
+	ThreadsCount *int64     `json:"threadsCount,omitempty"`
+	Cache        *Cache     `json:"cache,omitempty"`
+	Instances    []Instance `json:"instances"`
+}
+
 // instance.go
 
 type Instance struct {
